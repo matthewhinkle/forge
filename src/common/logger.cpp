@@ -67,7 +67,7 @@ Logger::Level Logger::get_level() const {
     return this->level;
 }
 
-void Logger::trace(const char * fmt, ...) {
+void Logger::trace(const char * fmt, ...) const {
     if(LOG_LEVEL_TRACE < this->level) return;
 
     std::string fmt_copy(fmt);
@@ -80,7 +80,7 @@ void Logger::trace(const char * fmt, ...) {
     va_end(args);
 }
 
-void Logger::info(const char * fmt, ...) {
+void Logger::info(const char * fmt, ...) const {
     if(LOG_LEVEL_INFO < this->level) return;
 
     std::string fmt_copy(fmt);
@@ -93,7 +93,7 @@ void Logger::info(const char * fmt, ...) {
     va_end(args);
 }
 
-void Logger::debug(const char * fmt, ...) {
+void Logger::debug(const char * fmt, ...) const {
     if(LOG_LEVEL_DEBUG < this->level) return;
 
     std::string fmt_copy(fmt);
@@ -106,7 +106,7 @@ void Logger::debug(const char * fmt, ...) {
     va_end(args);
 }
 
-void Logger::warn(const char * fmt, ...) {
+void Logger::warn(const char * fmt, ...) const {
     if(LOG_LEVEL_WARN < this->level) return;
 
     std::string fmt_copy(fmt);
@@ -119,7 +119,7 @@ void Logger::warn(const char * fmt, ...) {
     va_end(args);
 }
 
-void Logger::error(const char * fmt, ...) {
+void Logger::error(const char * fmt, ...) const {
     if(LOG_LEVEL_ERROR < this->level) return;
 
     std::string fmt_copy(fmt);
@@ -132,7 +132,7 @@ void Logger::error(const char * fmt, ...) {
     va_end(args);
 }
 
-void Logger::fatal(const char * fmt, ...) {
+void Logger::fatal(const char * fmt, ...) const {
     if(LOG_LEVEL_FATAL < this->level) return;
 
     std::string fmt_copy(fmt);

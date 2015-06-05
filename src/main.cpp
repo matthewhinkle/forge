@@ -4,21 +4,25 @@
 #include "math/vec.h"
 #include "math/mat.h"
 
+#include "system/x-window-manager.h"
+
+#include <unistd.h>
+
 using namespace std;
 
 int main() {
     forge::Logger l("main");
-    l.trace("Hello, %s!\n", "matt");
 
-    forge::vec2 v(1.0f, 5.5f);
-    forge::vec2 v2(2.0f, 5.5f);
+    struct forge::wm wm;
+    forge::init_wm(&wm, forge::WM_OPTION_DEFAULT);
 
-    forge::vec2 r = v + v2 - v;
+    struct forge::window window;
+    forge::wm_init_window(&wm, &window, "Forge", 0, 0, 200, 200, forge::WINDOW_OPTION_DEFAULT);
 
-    l.fatal("Result = { %f, %f }\n", r.x, r.y);
+    forge::window_set_name(&window, "Forge 2");
+    forge::window_set_bounds(&window, 100, 100, 300, 300);
 
-    forge::mat4 m;
-    l.error("mat4 = { %f }", m(0, 3));
+    for(;;);
 
     return 0;
 }
