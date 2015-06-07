@@ -6,7 +6,7 @@
 #define FORGE_GL_H
 
 #if defined (__APPLE__) && defined (__MACH__)
-    #ifdef WITH_XLIB
+    #if defined (WITH_X11) || defined (WITH_XCB)
         #include <GL/gl.h>
         #include <GL/glx.h>
     #else

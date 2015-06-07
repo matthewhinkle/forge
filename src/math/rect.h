@@ -12,6 +12,8 @@ namespace forge {
 
         _rect(T x, T y, T width, T height) : x(x), y(y), width(width), height(height) { }
 
+        _rect(T bounds[4]) : x(bounds[0]), y(bounds[1]), width(bounds[2]), height(bounds[3]) { }
+
         _rect(const _rect & r) :
             x(r.x),
             y(r.y),

@@ -15,6 +15,7 @@
 #include "include/xkb.h"
 #include "include/gl.h"
 
+#include "opengl-context.h"
 #include "window-manager.h"
 
 namespace forge {
@@ -31,10 +32,15 @@ namespace forge {
         XVisualInfo * vinfo;
     };
 
+    struct glctx {
+        Display * display;
+        Drawable drawable;
+        GLXContext native;
+    };
+
     namespace xwm {
         static const Logger log("wm");
     }
-
 }
 
 #endif

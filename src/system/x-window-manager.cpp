@@ -4,7 +4,6 @@
 
 #ifdef WITH_XLIB
 
-#include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include "x-window-manager.h"
 
@@ -16,7 +15,7 @@ namespace forge {
     static const int PROPERTY_FORMAT_32 = 32;
 
     std::once_flag one_time_init_flag;
-    static void one_time_init(struct wm * wm, enum wmoptions options) {
+    static void one_time_init(struct wm * wm, unsigned options) {
         if(WM_OPTION_THREADS & options) {
             if(!XInitThreads()) {
                 log.warn("Failed to initialize X11 with threads.  This is expected on a single core.\n");
@@ -31,7 +30,7 @@ namespace forge {
         int major = XkbMajorVersion;
         int minor = XkbMinorVersion;
         int reason = 0;
-        Display * d = XkbOpenDisplay(nullptr, &event, &error, &major, &minor, &reason);
+        Display * d = XkbOpenDisplay(NULL, &event, &error, &major, &minor, &reason);
         switch(reason) {
             case XkbOD_Success: return d;
             case XkbOD_BadLibraryVersion: log.error("Failed to initialize Xkb: version incompatibility between compile and run-time Xlib/Xkb libraries.\n"); break;
@@ -42,15 +41,15 @@ namespace forge {
         }
 
         log.warn("Falling back to core Xlib keyboard implemenation.\n");
-        return XOpenDisplay(nullptr);
+        return XOpenDisplay(NULL);
     }
 
-    extern void init_wm(struct wm * wm, enum wmoptions options) {
+    extern void init_wm(struct wm * wm, unsigned options) {
         std::call_once(one_time_init_flag, one_time_init, wm, options);
 
         assert(wm);
 
-        Display * d = XOpenDisplay(NULL);
+        Display * d = open_display();
         int default_screen = XDefaultScreen(d);
 
         assert(d);
@@ -63,7 +62,60 @@ namespace forge {
         if(!wm) return;
 
         XCloseDisplay(wm->display);
-        wm->display = nullptr;
+        wm->display = NULL;
+    }
+
+    extern void wm_init_glctx(struct wm * wm, struct window * w, struct glctx * ctx, unsigned ctxoptions) {
+        assert(wm);
+        assert(w);
+        assert(ctx);
+
+        const int fbattr[] = {
+                GLX_DOUBLEBUFFER, ctxoptions ? True : False,
+                None
+        };
+
+        int fbcount = 0;
+        GLXFBConfig * fbconfigs = glXChooseFBConfig(wm->display, wm->default_screen, fbattr, &fbcount);
+
+        assert(fbconfigs);
+        assert(fbcount > 0);
+
+        GLXContext c = glXCreateNewContext(wm->display, *fbconfigs, GLX_RGBA_TYPE, NULL, True);
+
+        assert(c);
+
+        ctx->display = wm->display;
+        ctx->drawable = w->w;
+        ctx->native = c;
+    }
+
+    extern void wm_destroy_glctx(struct wm * wm, struct glctx * ctx) {
+        if(!ctx) return;
+
+        if(ctx->display && ctx->native) {
+            glXDestroyContext(ctx->display, ctx->native);
+            ctx->native = 0;
+            ctx->display = 0;
+        }
+    }
+
+    extern void * glctx_get_native(const struct glctx * ctx) {
+        assert(ctx);
+
+        return ctx->native;
+    }
+
+    extern void glctx_make_current(struct glctx * ctx) {
+        assert(ctx);
+
+        glXMakeContextCurrent(ctx->display, ctx->drawable, ctx->drawable, ctx->native);
+    }
+
+    extern void glctx_swap_buffers(struct glctx * ctx) {
+        assert(ctx);
+
+        glXSwapBuffers(ctx->display, ctx->drawable);
     }
 
     static const unsigned long EVENT_MASK = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | ButtonMotionMask | PointerMotionMask | PointerMotionHintMask;
@@ -122,7 +174,7 @@ namespace forge {
                                struct window * w,
                                const char * name,
                                int x, int y, int width, int height,
-                               enum windowoptions options) {
+                               unsigned options) {
         assert(wm);
         assert(w);
         assert(name);

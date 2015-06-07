@@ -5,7 +5,7 @@
 #ifndef FORGE_XLIB_H
 #define FORGE_XLIB_H
 
-#ifdef WITH_XLIB
+#if defined (WITH_XLIB) || defined (WITH_XCB)
 
 #include <X11/Xlib.h>
 
